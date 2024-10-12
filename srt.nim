@@ -48,35 +48,29 @@
 ##   echo("Y1: " & srt.subtitles[0].coordinates.y1) # Output: "Y1: 100"
 
 
-import times
-import sequtils
-import strutils
-import parseutils
-import strformat
-import strscans
-
+import std/[parseutils, sequtils, strformat, strscans, strutils, times]
 
 type
   SRTData* = ref object
     subtitles*: seq[SRTSubtitle]
 
   SRTSubtitle* = ref object
-    number* : int
-    startTime* : TimeInterval
-    endTime* : TimeInterval
-    coordinates* : SRTCoordinates
-    text* : string
+    number*: int
+    startTime*: TimeInterval
+    endTime*: TimeInterval
+    coordinates*: SRTCoordinates
+    text*: string
 
   SRTCoordinates* = ref object
-    x1* : int
-    y1* : int
-    x2* : int
-    y2* : int
+    x1*: int
+    y1*: int
+    x2*: int
+    y2*: int
 
-proc parseTimes(s:string): tuple[startTime:TimeInterval, endTime:TimeInterval] =
+proc parseTimes(s: string): tuple[startTime: TimeInterval, endTime: TimeInterval] =
   ## Parses time hh:mm:ss,uuu --> hh:mm:ss,uuuinto (TimeInterval,TimeInterval)
-  var sh,sm,ss,su,eh,em,es,eu: int
-  if scanf(s,"$i:$i:$i,$i --> $i:$i:$i,$i",sh,sm,ss,su,eh,em,es,eu):
+  var sh, sm, ss, su, eh, em, es, eu: int
+  if scanf(s,"$i:$i:$i,$i --> $i:$i:$i,$i", sh, sm, ss, su, eh, em, es, eu):
     return (
       startTime: initTimeInterval(milliseconds = su, seconds = ss, minutes = sm, hours = sh),
         endTime: initTimeInterval(milliseconds = eu, seconds = es, minutes = em, hours = eh))
@@ -84,12 +78,12 @@ proc parseTimes(s:string): tuple[startTime:TimeInterval, endTime:TimeInterval] =
     startTime: initTimeInterval(milliseconds = 0, seconds = 0, minutes = 0, hours = 0),
       endTime: initTimeInterval(milliseconds = 0, seconds = 0, minutes = 0, hours = 0))
 
-proc parseCoords(s:string): SRTCoordinates =
+proc parseCoords(s: string): SRTCoordinates =
   ## Parses X1:<int> X2:<int> Y1:<int> Y2:<int> into SRTCoordinates
   result = SRTCoordinates()
-  let start = find(s," X1:")
-  if start >= 0 and scanf(s[start..^1]," X1:$i X2:$i Y1:$i Y2:$i",
-    result.x1,result.x2,result.y1,result.y2):
+  let start = find(s, " X1:")
+  if start >= 0 and scanf(s[start..^1], " X1:$i X2:$i Y1:$i Y2:$i",
+    result.x1, result.x2, result.y1, result.y2):
     return result
   return result
 
@@ -97,18 +91,18 @@ template isDigits(s: string): bool = s.allIt(it in Digits)
 
 proc parseSRT*(srtData : string): SRTData =
   ## Parses a string containing SRT data into an ``SRTData`` object.
-  var data : seq[string] = srtData.replace("\r\n", "\n").replace("\r", "\n").strip(leading = true, trailing = true).split("\n\n")
+  var data : seq[string] = srtData.replace("\r\n", "\n").replace("\r", "\n").strip().split("\n\n")
   var srt : SRTData = SRTData(subtitles: @[])
 
   var index = 0
   for i in data:
     inc index
     var sub : SRTSubtitle = SRTSubtitle()
-    var lines : seq[string] = i.strip(leading = true, trailing = true).split("\n")
+    var lines : seq[string] = i.strip().split("\n")
 
     var offset = 0
     if index == 1: # The first line may contain BOM marks which should be skipped when parsing the integer
-      offset = find(lines[0],{'0','1','2','3','4','5','6','7','8','9'})
+      offset = find(lines[0], Digits)
     var number: string = lines[0][offset..^1]
     if not number.isDigits():
       # lets assume the content belongs to previous line
