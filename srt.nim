@@ -22,10 +22,10 @@
 ## .. code-block:: nimrod
 ##
 ##   # Parse the data.
-##   var srt : SRTData = readSRT("example.srt")
+##   var srt: SRTData = readSRT("example.srt")
 ##   # The previous line could also have been done the following ways:
-##   # var srt : SRTData = parseSRT(readFile("example.srt"))
-##   # var srt : SRTData = parseSRT(open("example.srt"))
+##   # var srt: SRTData = parseSRT(readFile("example.srt"))
+##   # var srt: SRTData = parseSRT(open("example.srt"))
 ##
 ##   # Loop through the subtitles and output the subtitle text:
 ##   for subtitle in srt.subtitles:
@@ -37,7 +37,7 @@
 ##   # are no blank lines in the middle
 ##
 ##   # Output the start and end times of the second subtitle.
-##   var subtitle : SRTSubtitle = srt.subtitles[1]
+##   var subtitle: SRTSubtitle = srt.subtitles[1]
 ##   echo(subtitle.startTime) # Output: "01:52:45,000"
 ##   echo(subtitle.endTime) # Output: "01:53:00,400"
 ##
@@ -89,16 +89,16 @@ proc parseCoords(s: string): SRTCoordinates =
 
 template isDigits(s: string): bool = s.allIt(it in Digits)
 
-proc parseSRT*(srtData : string): SRTData =
+proc parseSRT*(srtData: string): SRTData =
   ## Parses a string containing SRT data into an ``SRTData`` object.
-  var data : seq[string] = srtData.replace("\r\n", "\n").replace("\r", "\n").strip().split("\n\n")
-  var srt : SRTData = SRTData(subtitles: @[])
+  var data: seq[string] = srtData.replace("\r\n", "\n").replace("\r", "\n").strip().split("\n\n")
+  var srt: SRTData = SRTData(subtitles: @[])
 
   var index = 0
   for i in data:
     inc index
-    var sub : SRTSubtitle = SRTSubtitle()
-    var lines : seq[string] = i.strip().split("\n")
+    var sub: SRTSubtitle = SRTSubtitle()
+    var lines: seq[string] = i.strip().split("\n")
 
     var offset = 0
     if index == 1: # The first line may contain BOM marks which should be skipped when parsing the integer
@@ -123,12 +123,12 @@ proc parseSRT*(srtData : string): SRTData =
   return srt
 
 
-proc parseSRT*(srtData : File): SRTData =
+proc parseSRT*(srtData: File): SRTData =
   ## Parses a file containing SRT data into an ``SRTData`` object.
   return parseSRT(readAll(srtData))
 
 
-proc readSRT*(filename : string): SRTData =
+proc readSRT*(filename: string): SRTData =
   ## Reads and parses a file containing SRT data into an ``SRTData`` object.
   return parseSRT(readFile(filename))
 
